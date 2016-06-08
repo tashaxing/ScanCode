@@ -177,6 +177,7 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     }
 }
 
+//use regular expression to recognize URL
 - (BOOL)isURL:(NSString *)str
 {
     NSString *regex = @"[a-zA-z]+://[^s]*";

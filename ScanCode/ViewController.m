@@ -44,7 +44,7 @@
     NSLog(@"start scan!");
     CaptureViewController *captureViewController = [[CaptureViewController alloc] init];
     
-
+    //navigate to the scan page
     [self.navigationController pushViewController:captureViewController animated:YES];
 }
 
