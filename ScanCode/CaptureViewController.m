@@ -11,22 +11,24 @@
 #import "CaptureViewController.h"
 #import "BrowserViewController.h"
 
-const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indentifier
+//the new process queue indentifier
+const char *kScanCodeQueueName = "ScanCodeQueue";
 
 
 @interface CaptureViewController ()<AVCaptureMetadataOutputObjectsDelegate>
 {
-    AVCaptureSession *session; //the session of captrue
+    //the session of captrue
+    AVCaptureSession *session;
     BOOL isLightOpen;
 }
 
-@property (nonatomic, strong) UIView *cameraView; //the camera frame view
-@property (nonatomic, strong) UIButton *openLightBtn; //open the light
+@property (nonatomic, strong) UIView *cameraView;      //the camera frame view
+@property (nonatomic, strong) UIButton *openLightBtn;  //open the light
 
 @end
 
 @implementation CaptureViewController
-
+#pragma mark - system delegate functions
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -47,48 +49,40 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     [lightButton addTarget: self action:@selector(switchLight) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:lightButton];
     
-    
-    
     //start capture
     [self initCapture];
     [session startRunning];
-    
 }
 
 - (void)loadView
 {
     [super loadView];
-//    [self initCapture];
-
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-//    [self initCapture];
 }
 
-
-- (void)switchLight
+- (void)didReceiveMemoryWarning
 {
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    //toggle the light
-    isLightOpen = !isLightOpen;
-    //turn on or off the light
-    if([device hasTorch])
-    {
-        [device lockForConfiguration:nil];
-        
-        if(isLightOpen)
-            [device setTorchMode:AVCaptureTorchModeOn];
-        else
-            [device setTorchMode:AVCaptureTorchModeOff];
-        
-        [device unlockForConfiguration];
-    }
-        
+    [super didReceiveMemoryWarning];
 }
 
+#pragma mark - capture delegate
+-(void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
+{
+    if (metadataObjects && metadataObjects.count>0)
+    {
+        //stop the capture
+        [session stopRunning];
+        AVMetadataMachineReadableCodeObject * metadataObject = [metadataObjects objectAtIndex : 0 ];
+        //do sth to handle the capture result
+        [self performSelectorOnMainThread:@selector(handleResult:) withObject:metadataObject waitUntilDone:NO];
+    }
+}
+
+#pragma mark - helper funtions
 - (void)initCapture
 {
     //get the camera device
@@ -116,7 +110,6 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     dispatchQueue = dispatch_queue_create(kScanCodeQueueName, NULL);
     [output setMetadataObjectsDelegate:self queue:dispatchQueue];
     
-    
     //set the sampling rate
     [session setSessionPreset:AVCaptureSessionPresetHigh];
     
@@ -128,33 +121,24 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     AVCaptureVideoPreviewLayer *captureLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     captureLayer.videoGravity=AVLayerVideoGravityResizeAspectFill;
     captureLayer.frame=self.cameraView.layer.bounds;
-    [self.cameraView.layer insertSublayer:captureLayer atIndex:0]; //or use the addsublayer
-//    [self.cameraView.layer addSublayer:captureLayer];
+    [self.cameraView.layer insertSublayer:captureLayer atIndex:0];
     
-}
-
-#pragma mark - capture delegate
--(void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
-{
-    if (metadataObjects && metadataObjects.count>0)
-    {
-        //stop the capture
-        [session stopRunning];
-        AVMetadataMachineReadableCodeObject * metadataObject = [metadataObjects objectAtIndex : 0 ];
-        //do sth to handle the capture result
-        [self performSelectorOnMainThread:@selector(handleResult:) withObject:metadataObject waitUntilDone:NO];
-    }
+    //or use the addsublaye
+    //    [self.cameraView.layer addSublayer:captureLayer];
 }
 
 - (void)handleResult:(AVMetadataMachineReadableCodeObject *)metadataObject
 {
-
     NSLog(@"%@", metadataObject.type);
     if([metadataObject.type isEqualToString:AVMetadataObjectTypeQRCode])
+    {
         NSLog(@"QR code");
+    }
     else
+    {
         NSLog(@"other code");
-    
+
+    }
     NSString *captureStr = metadataObject.stringValue;
     NSLog(@"%@",captureStr);
     
@@ -177,6 +161,29 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     }
 }
 
+- (void)switchLight
+{
+    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    //toggle the light
+    isLightOpen = !isLightOpen;
+    //turn on or off the light
+    if([device hasTorch])
+    {
+        [device lockForConfiguration:nil];
+        
+        if(isLightOpen)
+        {
+            [device setTorchMode:AVCaptureTorchModeOn];
+        }
+        else
+        {
+            [device setTorchMode:AVCaptureTorchModeOff];
+        }
+        
+        [device unlockForConfiguration];
+    }
+}
+
 //use regular expression to recognize URL
 - (BOOL)isURL:(NSString *)str
 {
@@ -184,12 +191,5 @@ const char *kScanCodeQueueName = "ScanCodeQueue"; //the new process queue indent
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", regex];
     return [predicate evaluateWithObject:str];
 }
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 @end

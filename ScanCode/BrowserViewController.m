@@ -26,15 +26,11 @@
     NSURL *url = [NSURL URLWithString:_urlStr];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [browser loadRequest:request];
-    
-
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
 
 @end

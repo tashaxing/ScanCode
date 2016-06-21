@@ -6,13 +6,13 @@
 //  Copyright © 2016年 yxhe. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "UPViewController.h"
 #import "CaptureViewController.h"
 
-@interface ViewController ()
+@interface UPViewController ()
 @end
 
-@implementation ViewController
+@implementation UPViewController
 
 - (void)viewDidLoad
 {
@@ -32,14 +32,18 @@
     [scanButton setTitle:@"scan" forState:UIControlStateNormal];
     [scanButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [scanButton setTitleColor:[UIColor greenColor] forState:UIControlEventTouchDown];
-    [scanButton addTarget:self action:@selector(clicked) forControlEvents:UIControlEventTouchUpInside];
+    [scanButton addTarget:self action:@selector(ScanButtonClicked) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:scanButton];
-
 }
 
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
-- (void)clicked
+- (void)ScanButtonClicked
 {
     NSLog(@"start scan!");
     CaptureViewController *captureViewController = [[CaptureViewController alloc] init];
@@ -47,14 +51,5 @@
     //navigate to the scan page
     [self.navigationController pushViewController:captureViewController animated:YES];
 }
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-    
-}
-
-
 
 @end
