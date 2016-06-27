@@ -115,7 +115,9 @@ const char *kScanCodeQueueName = "ScanCodeQueue";
     
     //set the code type ,ex:QR and bar code
     if([output.availableMetadataObjectTypes containsObject:AVMetadataObjectTypeQRCode])
+    {
         [output setMetadataObjectTypes:[NSArray arrayWithObjects:AVMetadataObjectTypeQRCode,AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode128Code, nil]];
+    }
     
     //add the camera layer
     AVCaptureVideoPreviewLayer *captureLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
@@ -123,7 +125,7 @@ const char *kScanCodeQueueName = "ScanCodeQueue";
     captureLayer.frame=self.cameraView.layer.bounds;
     [self.cameraView.layer insertSublayer:captureLayer atIndex:0];
     
-    //or use the addsublaye
+    //or use the addsublayer
     //    [self.cameraView.layer addSublayer:captureLayer];
 }
 
@@ -164,8 +166,10 @@ const char *kScanCodeQueueName = "ScanCodeQueue";
 - (void)switchLight
 {
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    
     //toggle the light
     isLightOpen = !isLightOpen;
+    
     //turn on or off the light
     if([device hasTorch])
     {
